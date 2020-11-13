@@ -2,7 +2,8 @@
 这章大概是讲class中成员变量的布局和存取
 
 ## 3.1 Data Member 的绑定（The Binding of a Data Member）
-“member rewriting rule”规则，大意是“一个 inline 函数实体，在整个 class 未被完全看见之前，是不会被评估求值（evaluated）的”
+“member rewriting rule”规则，大意是“一个 inline 函数实体，在整个 class 未被完全看见之前，是不会被评估求值（evaluated）的”  
+
 举了个例子
 ```
 // test0.cpp
@@ -94,9 +95,11 @@ class Point3d {
 };
 ```
 下图就是 Point2d 和 Point3d 的对象布局，在没有 virtual function 的情况下，它们和 C struct 完全一样：
-[图]
+![image_text]()(https://github.com/lizhicun/c_obj_3/blob/main/image/point_concrete_without_virtual_function.jpg)
+
 下面讨论 Point 的“单一继承且不含 virtual function”、“单一继承含 virtual function”、“多重继承”、“虚拟继承”等四种情况。
-1. 只要继承不要多态（Inheritance without Polymorphism）
+
+### 只要继承不要多态（Inheritance without Polymorphism）
 ```
 class Point2d {
  public:
@@ -142,9 +145,8 @@ class Point3d : public Point2d {
 };
 ```
 Point2d 和 Point3d 的继承关系如下图所示
-[图]
-有个容易犯的错误是把一个 class 分解为两次或更多层，这样可能会导致所需空间的膨胀。
-C++ 语言保证“出现在 derived class 中的 base class subobject 有其完整原样性”，结合以下代码理解。
+![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/point2d_point3d_layout.jpg)
+有个容易犯的错误是把一个 class 分解为两次或更多层，这样可能会导致所需空间的膨胀。因为C++ 语言保证“出现在 derived class 中的 base class subobject 有其完整原样性”，结合以下代码理解。
 ```
 class Concrete {
  public:
@@ -157,7 +159,8 @@ class Concrete {
 };
 ```
 其内存布局如下，共占用 8 bytes：
-[图]
+
+![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/concrete_obj.jpg)
 
 现在，将 concrete 分裂成三层结构：
 ```
@@ -184,7 +187,7 @@ class Concrete3 : public Concrete2 {
 };
 ```
 现在，Concrete3 object 的大小是 16 bytes！下面是内存布局图：
-[图]
+![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/concrete_obj_derive.jpg)
 
 为什么要这样，让我们声明以下一组指针：
 ```
@@ -200,23 +203,22 @@ Concrete1 *pc1_1, *pc1_2;
 pc1_1 = pc2;
 *pc1_2 = *pc1_1;
 ```
-[图]
+![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/concrete_assign_bug.jpg)
 也就是说，把一个 Concrete1 复制给 Concrete2 时，Concrete2 原本的 bit2 的值被修改了。
 
-加上多态（Adding Polymorphism）
-简单讲了
-加上多态带来了以下负担：
-导入一个和 Point2d 有关的 virtual table，这个 table 的元素数目一般而言是 virtual function 的数目在加上 1 或 2 个 slots（用来支持 runtime time identification）。
-在每个 class object 中导入 vptr，提供执行期的链接。
-加强 constructor，用来为 vptr 设定初值。
-加强 destructor， 用来消除 vptr。
+### 加上多态（Adding Polymorphism）
+简单讲了加上多态带来了以下负担：
+* 导入一个和 Point2d 有关的 virtual table，这个 table 的元素数目一般而言是 virtual function 的数目在加上 1 或 2 个 slots（用来支持 runtime time identification）。
+* 在每个 class object 中导入 vptr，提供执行期的链接。
+* 加强 constructor，用来为 vptr 设定初值。
+* 加强 destructor， 用来消除 vptr。
 具体的在4.4中讨论
 
-多重继承（Multiple Inheritance）
+### 多重继承（Multiple Inheritance）
 考虑如下图所示的继承体系
-[图]
+![image](https://github.com/lizhicun/c_obj_3/blob/main/image/vertex3d.jpg)
 其中，Point2d 与 Point3d 和 Vertex 都有 virtual function 接口。它们的数据布局如下图所示：
-[图]
+![image](https://github.com/lizhicun/c_obj_3/blob/main/image/vertex3d_layout.jpg)
 多重继承的问题主要发生于 derived class object 和其第二或后继的 base class object 之间的转换，对一个多重派生对象，将其地址指定给“最左端（也就是第一个）base class 的指针”，情况和单一继承一样，因为它们有相同的地址。而第二或后继的 base class 起始的地址，则与 derived class 不同（可以在上图中看出，Vertex 在 Point3d 后面）。所以如下操作：
 ```
 Vertex3d v3d;
