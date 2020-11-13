@@ -95,6 +95,7 @@ class Point3d {
 };
 ```
 下图就是 Point2d 和 Point3d 的对象布局，在没有 virtual function 的情况下，它们和 C struct 完全一样：
+
 ![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/point_concrete_without_virtual_function.jpg)
 
 下面讨论 Point 的“单一继承且不含 virtual function”、“单一继承含 virtual function”、“多重继承”、“虚拟继承”等四种情况。
@@ -145,7 +146,9 @@ class Point3d : public Point2d {
 };
 ```
 Point2d 和 Point3d 的继承关系如下图所示
+
 ![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/point2d_point3d_layout.jpg)
+
 有个容易犯的错误是把一个 class 分解为两次或更多层，这样可能会导致所需空间的膨胀。因为C++ 语言保证“出现在 derived class 中的 base class subobject 有其完整原样性”，结合以下代码理解。
 ```
 class Concrete {
@@ -187,6 +190,7 @@ class Concrete3 : public Concrete2 {
 };
 ```
 现在，Concrete3 object 的大小是 16 bytes！下面是内存布局图：
+
 ![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/concrete_obj_derive.jpg)
 
 为什么要这样，让我们声明以下一组指针：
@@ -204,6 +208,7 @@ pc1_1 = pc2;
 *pc1_2 = *pc1_1;
 ```
 ![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/concrete_assign_bug.jpg)
+
 也就是说，把一个 Concrete1 复制给 Concrete2 时，Concrete2 原本的 bit2 的值被修改了。
 
 ### 加上多态（Adding Polymorphism）
@@ -216,9 +221,13 @@ pc1_1 = pc2;
 
 ### 多重继承（Multiple Inheritance）
 考虑如下图所示的继承体系
+
 ![image](https://github.com/lizhicun/c_obj_3/blob/main/image/vertex3d.jpg)
+
 其中，Point2d 与 Point3d 和 Vertex 都有 virtual function 接口。它们的数据布局如下图所示：
+
 ![image](https://github.com/lizhicun/c_obj_3/blob/main/image/vertex3d_layout.jpg)
+
 多重继承的问题主要发生于 derived class object 和其第二或后继的 base class object 之间的转换，对一个多重派生对象，将其地址指定给“最左端（也就是第一个）base class 的指针”，情况和单一继承一样，因为它们有相同的地址。而第二或后继的 base class 起始的地址，则与 derived class 不同（可以在上图中看出，Vertex 在 Point3d 后面）。所以如下操作：
 ```
 Vertex3d v3d;
@@ -248,6 +257,7 @@ p3d = &v3d;
 ```
 直接看表吧：
 ![image](https://github.com/lizhicun/c_obj_3/blob/main/image/object_member_efficiency.jpg)
+
 ![image](https://github.com/lizhicun/c_obj_3/blob/main/image/object_member_efficiency1.jpg)
 
 ### 指向 Data Members 的指针（Pointer to Data Members）
@@ -276,6 +286,7 @@ class Point3d {
 ### “指向 Members 的指针”的效率问题
 直接看结果吧：
 ![image](https://github.com/lizhicun/c_obj_3/blob/main/image/data_member_efficiency.jpg)
+
 ![image](https://github.com/lizhicun/c_obj_3/blob/main/image/data_member_efficiency1.jpg)
 由于虚拟继承引入的间接性，每次存取 Point::x （pB 是一个虚基类）：
 ```
