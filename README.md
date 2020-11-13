@@ -95,7 +95,7 @@ class Point3d {
 };
 ```
 下图就是 Point2d 和 Point3d 的对象布局，在没有 virtual function 的情况下，它们和 C struct 完全一样：
-![image_text]()(https://github.com/lizhicun/c_obj_3/blob/main/image/point_concrete_without_virtual_function.jpg)
+![image_text](https://github.com/lizhicun/c_obj_3/blob/main/image/point_concrete_without_virtual_function.jpg)
 
 下面讨论 Point 的“单一继承且不含 virtual function”、“单一继承含 virtual function”、“多重继承”、“虚拟继承”等四种情况。
 
@@ -242,15 +242,15 @@ p3d = &v3d;
 只需见到拷贝其地址即可。
 
 
-对象成员的效率（Object Member Efficiency）
+## 3.5对象成员的效率（Object Member Efficiency）
 ```
-hahhahahah
+// ./test1.out & ./test2.out & ./test3.out
 ```
 直接看表吧：
-[图]
-[图]
+![image](https://github.com/lizhicun/c_obj_3/blob/main/image/object_member_efficiency.jpg)
+![image](https://github.com/lizhicun/c_obj_3/blob/main/image/object_member_efficiency1.jpg)
 
-指向 Data Members 的指针（Pointer to Data Members）
+### 指向 Data Members 的指针（Pointer to Data Members）
 ```
 class Point3d {
  public:
@@ -273,9 +273,10 @@ class Point3d {
 &origin.z;
 ```
 
-“指向 Members 的指针”的效率问题
+### “指向 Members 的指针”的效率问题
 直接看结果吧：
-[图]\[图]
+![image](https://github.com/lizhicun/c_obj_3/blob/main/image/data_member_efficiency.jpg)
+![image](https://github.com/lizhicun/c_obj_3/blob/main/image/data_member_efficiency1.jpg)
 由于虚拟继承引入的间接性，每次存取 Point::x （pB 是一个虚基类）：
 ```
 pB.*bx
