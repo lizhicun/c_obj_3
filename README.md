@@ -1,27 +1,49 @@
-# c_obj_3
+# 第三章 Data语义学
 这章大概是讲class中成员变量的布局和存取
 
-3.1 Data Member 的绑定（The Binding of a Data Member）
+## 3.1 Data Member 的绑定（The Binding of a Data Member）
 “member rewriting rule”规则，大意是“一个 inline 函数实体，在整个 class 未被完全看见之前，是不会被评估求值（evaluated）的”
 举了个例子
 ```
-hahaha
+// test0.cpp
+ extern int x;
+ 
+ class A
+ {
+ public:
+     ...
+     //对于函数本体的分析将延迟，直至class申明的}出现时才开始。
+     float X() const { return x; }
+     ...
+     float x;
+     ...
+ }
+//这儿进行该函数的分析，所以此时用到的x不是全局变量x而是class A中的成员x
 ```
 然而，对于 member function 的 argument list 并不是这样，Argument list 中的名词还是会在第一次遇到时就被决议（resolved）完成
 又举了个例子
 ```
-dadada
+// test1.cpp
+typedef int length;
+class Point3d{
+public:
+ void f1(length l){ cout << l << endl; }
+ typedef string length;
+ void f2(length l){ cout << l << endl; }
+};
 ```
-所以对于 nested type（typedef）的声明，还是应该放在 class 的起始处。
+这样 f1 绑定的 length 类型是 int；而 f2 绑定的 length 类型才是 string。所以，对于 typedef 需要防御性的程序风格：始终把 nested type 声明（即 typedef）放在
+class 起始处！
 
-3.2 Data Member 的布局（Data Member Layout）
-Nonstatic data member 在 class object 中的排列顺序和其被声明的顺序一样
-static data member 都不会放进对象布局中。static data member 放在程序的 data segment 中。
-同一个 access section 中，member 的排列只需符合“较晚出现的 member 在 class object 中有较高的地址”即可，而 member 并不一定要连续排列（alignment 可能就需要安插在当中）。
-编译器可能合成一些内部使用的 data member，比如 vptr，vptr 传统上放在所有明确声明的 member 之后，不过也有一些编译器把 vptr 放在 class object 的最前端（放在中间都是可以的）。
-各个 access section 中的 data member 也可自由排列，不必在乎顺序，但目前各家编译器都是把一个以上 access sections 按照声明的次序放在一起的。section 的数量不会有额外的负担。
+## 3.2 Data Member 的布局（Data Member Layout）
+遵循下面的规则
+* Nonstatic data member 在 class object 中的排列顺序和其被声明的顺序一样
+* static data member 都不会放进对象布局中。static data member 放在程序的 data segment 中
+* 同一个 access section (public, private)中，member 的排列只需符合“较晚出现的 member 在 class object 中有较高的地址”即可
+* 编译器可能合成一些内部使用的 data member，比如 vptr，vptr 传统上放在所有明确声明的 member 之后，不过也有一些编译器把 vptr 放在 class object 的最前端（放在中间都是可以的）。
+* 各个 access section 中的 data member 也可自由排列，不必在乎顺序。section 的数量不会有额外的负担。
 
-3.3 Data Member 的存取
+## 3.3 Data Member 的存取
 ```
 Point3d origin, *pt = &origin;
 
@@ -30,7 +52,7 @@ pt->x = 0.0;
 ```
 通过 origin 存取和通过 pt 存取，有什么重大差异吗？
 
-Static Data Members
+* Static Data Members
 ```
 // origin.chunkSize = 250;
 Point3d::chunkSize = 250;
@@ -39,7 +61,7 @@ Point3d::chunkSize = 250;
 ```
 Static data member 被编译器提出于 class 之外，并被视为 global 变量（但只在 class 的范围内可见），其存取效率不会受 class object 的影响，不会有任何空间或时间上的额外负担。
 
-Nonstatic Data Members
+* Nonstatic Data Members
 要想对 nonstatic data member 进行存取，编译器需要把 class object 的起始地址加上一个 data member 的偏移量（offset）：
 ```
 origin._y = 0.0;
@@ -49,7 +71,7 @@ origin._y = 0.0;
 &origin + (&Point3d::_y - 1);
 ```
 
-3.4 继承与DataMenber
+## 3.4 继承与DataMenber
 有如下两个抽象数据类型：
 ```
 // supporting abstract data types
